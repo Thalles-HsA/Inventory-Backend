@@ -1,10 +1,9 @@
-<h1 style="text-align: center;">  
-    Projeto Inventory 
+<h1 align="center">  
     <img src="./inventory.png" alt="Descrição da imagem" width="300" style="margin-top: 32px; display:block; margin: auto" >
 </h1>
 
 
-<div style="text-align: center">
+<div align="center">
 
 ![GitHub](https://img.shields.io/github/license/Thalles-HsA/Inventory-Backend)
 ![GitHub package.json version (subfolder of monorepo)](https://img.shields.io/github/package-json/v/Thalles-HsA/Inventory-Backend)

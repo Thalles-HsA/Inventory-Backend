@@ -8,7 +8,6 @@
     "server": "nodemon ./app.js",
     "release": "semantic-release",
     "release:dry": "semantic-release --dry-run"
-    
   },
   "engines": {
     "node": "18"

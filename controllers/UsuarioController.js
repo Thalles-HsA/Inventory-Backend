@@ -25,6 +25,7 @@ const registrar = async (req, res) => {
     razaoSocial,
     cnpj,
     logradouro,
+    complemento,
     numero,
     bairro,
     cidade,
@@ -55,6 +56,7 @@ const registrar = async (req, res) => {
       : { razaoSocial, cnpj }),
     logradouro,
     numero,
+    complemento,
     bairro,
     cidade,
     estado,
@@ -109,7 +111,27 @@ const login = async (req, res) => {
 // Atualizando o usuario
 const atualizacao = async (req, res) => {
   const {
-    nome, razaoSocial, senha, logradouro, numero, bairro, cidade, estado, cep,
+    nome,
+    razaoSocial,
+    senha,
+    logradouro,
+    numero,
+    bairro,
+    cidade,
+    estado,
+    cep,
+    complemento,
+    nomeFantasia,
+    inscricaoEstadual,
+    isento,
+    inscricaoMunicipal,
+    cnae,
+    atividadePrincipal,
+    regimeTributario,
+    tamanhoEmpresa,
+    segmento,
+    faturamentoAnual,
+    quantidadeFuncionario,
   } = req.body;
 
   const reqUsuario = req.usuario;
@@ -126,36 +148,29 @@ const atualizacao = async (req, res) => {
       res.status(422).json({ errors: ["Erro ao atualizar! Verifique o 'tipo' de cliente!"] });
       return;
     }
-
     if (senha && senha !== null) {
       const salt = await bcrypt.genSalt();
       const senhaHash = await bcrypt.hash(senha, salt);
       usuario.senha = senhaHash;
     }
-
-    if (logradouro) {
-      usuario.logradouro = logradouro;
-    }
-
-    if (numero) {
-      usuario.numero = numero;
-    }
-
-    if (bairro) {
-      usuario.bairro = bairro;
-    }
-
-    if (cidade) {
-      usuario.cidade = cidade;
-    }
-
-    if (estado) {
-      usuario.estado = estado;
-    }
-
-    if (cep) {
-      usuario.cep = cep;
-    }
+    usuario.nomeFantasia = nomeFantasia || usuario.nomeFantasia;
+    usuario.inscricaoEstadual = inscricaoEstadual || usuario.inscricaoEstadual;
+    usuario.isento = isento || usuario.isento;
+    usuario.inscricaoMunicipal = inscricaoMunicipal || usuario.inscricaoMunicipal;
+    usuario.cnae = cnae || usuario.cnae;
+    usuario.atividadePrincipal = atividadePrincipal || usuario.atividadePrincipal;
+    usuario.regimeTributario = regimeTributario || usuario.regimeTributario;
+    usuario.tamanhoEmpresa = tamanhoEmpresa || usuario.tamanhoEmpresa;
+    usuario.segmento = segmento || usuario.segmento;
+    usuario.faturamentoAnual = faturamentoAnual || usuario.faturamentoAnual;
+    usuario.quantidadeFuncionario = quantidadeFuncionario || usuario.quantidadeFuncionario;
+    usuario.logradouro = logradouro || usuario.logradouro;
+    usuario.numero = numero || usuario.numero;
+    usuario.complemento = complemento || usuario.complemento;
+    usuario.bairro = bairro || usuario.bairro;
+    usuario.cidade = cidade || usuario.cidade;
+    usuario.estado = estado || usuario.estado;
+    usuario.cep = cep || usuario.cep;
 
     await usuario.save();
 

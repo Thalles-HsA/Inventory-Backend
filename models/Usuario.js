@@ -16,13 +16,13 @@ const usuarioSchema = new mongoose.Schema({
     enum: ['cpf', 'cnpj'],
     required: true,
   },
-
   nome: {
     type: String,
     required() {
       return this.tipo === 'cpf';
     },
   },
+  nomeFantasia: String,
   cpf: {
     type: String,
     required() {
@@ -41,17 +41,25 @@ const usuarioSchema = new mongoose.Schema({
       return this.tipo === 'cnpj';
     },
   },
+  inscricaoEstadual: String,
+  isento: Boolean,
+  inscricaoMunicipal: String,
+  cnae: String,
+  atividadePrincipal: String,
+  regimeTributario: String,
+  tamanhoEmpresa: String,
+  segmento: Array,
+  faturamentoAnual: String,
+  quantidadeFuncionario: String,
 
   logradouro: {
     type: String,
     required: true,
   },
-
   numero: {
     type: String,
     required: true,
   },
-
   complemento: String,
 
   bairro: {

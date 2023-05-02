@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
@@ -113,6 +114,9 @@ const atualizacao = async (req, res) => {
   const {
     nome,
     razaoSocial,
+    cpf,
+    cnpj,
+    tipo,
     senha,
     logradouro,
     numero,
@@ -136,23 +140,49 @@ const atualizacao = async (req, res) => {
 
   const reqUsuario = req.usuario;
 
-  // eslint-disable-next-line no-underscore-dangle
+  if (tipo === 'cpf') {
+    const update = {
+      $unset:
+      {
+        segmento: 1,
+        razaoSocial: 1,
+        cnpj: 1,
+        inscricaoEstadual: 1,
+        isento: 1,
+        incricaoMunicipal: 1,
+        cnae: 1,
+        atividadePrincipal: 1,
+        regimeTributario: 1,
+        tamanhoEmpresa: 1,
+        faturamentoAnual: 1,
+        quantidadeFuncionario: 1,
+      },
+    };
+    await Usuario.updateOne({ _id: reqUsuario._id }, update);
+  } else if (tipo === 'cnpj') {
+    const update = {
+      $unset:
+      {
+        nome: 1,
+        cpf: 1,
+      },
+    };
+    await Usuario.updateOne({ _id: reqUsuario._id }, update);
+  }
+
   const usuario = await Usuario.findById(reqUsuario._id).select('-senha');
 
   if (usuario !== null) {
-    if (nome && usuario.tipo === 'cpf') {
-      usuario.nome = nome;
-    } else if (razaoSocial && usuario.tipo === 'cnpj') {
-      usuario.razaoSocial = razaoSocial;
-    } else {
-      res.status(422).json({ errors: ["Erro ao atualizar! Verifique o 'tipo' de cliente!"] });
-      return;
-    }
+    usuario.nome = nome || usuario.nome;
+    usuario.razaoSocial = razaoSocial || usuario.razaoSocial;
     if (senha && senha !== null) {
       const salt = await bcrypt.genSalt();
       const senhaHash = await bcrypt.hash(senha, salt);
       usuario.senha = senhaHash;
     }
+    usuario.cnpj = cnpj || usuario.cnpj;
+    usuario.cpf = cpf || usuario.cpf;
+    usuario.tipo = tipo || usuario.tipo;
     usuario.nomeFantasia = nomeFantasia || usuario.nomeFantasia;
     usuario.inscricaoEstadual = inscricaoEstadual || usuario.inscricaoEstadual;
     usuario.isento = isento || usuario.isento;

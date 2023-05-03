@@ -202,6 +202,7 @@ const atualizacao = async (req, res) => {
     usuario.estado = estado || usuario.estado;
     usuario.cep = cep || usuario.cep;
 
+    console.log(usuario);
     await usuario.save();
 
     res.status(200).json(usuario);

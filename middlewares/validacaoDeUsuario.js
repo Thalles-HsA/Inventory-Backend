@@ -75,20 +75,57 @@ const validacaoDeLogin = () => [
 ];
 
 const atualizacaoDeUsuario = () => [
+  body('tipo')
+    .isString()
+    .withMessage('O tipo é obrigatório.'),
+  body('cpf')
+    .if(body('tipo').equals('cpf'))
+    .notEmpty()
+    .withMessage('O CPF é obrigatório.')
+    .custom((value) => cpfCnpjValidator.cpf.isValid(value))
+    .withMessage('CPF inválido.'),
+  body('cnpj')
+    .if(body('tipo').equals('cnpj'))
+    .notEmpty()
+    .withMessage('O CNPJ é obrigatório.')
+    .custom((value) => cpfCnpjValidator.cnpj.isValid(value))
+    .withMessage('CNPJ inválido.'),
   body('nome')
     .if(body('tipo').equals('cpf'))
-    .optional()
+    .notEmpty()
+    .withMessage('O nome é obrigatório.')
     .isLength({ min: 3 })
-    .withMessage('O nome precisa ter no mínimo 3 caracteres.'),
+    .withMessage('O nome deve ter no minimo 3 caracteres'),
   body('razaoSocial')
     .if(body('tipo').equals('cnpj'))
-    .optional()
+    .notEmpty()
+    .withMessage('A razão social é obrigatório.')
     .isLength({ min: 3 })
-    .withMessage('A razão social precisa ter no mínimo 3 caracteres.'),
-  body('senha')
-    .optional()
-    .isLength({ min: 5 })
-    .withMessage('A senha precisa de no mínimo 5 caracteres.'),
+    .withMessage('A razão social deve ter no minimo 3 caracteres'),
+  body('logradouro')
+    .isString()
+    .notEmpty()
+    .withMessage('O logradouro é obrigatório.'),
+  body('numero')
+    .isString()
+    .notEmpty()
+    .withMessage('O número é obrigatório.'),
+  body('bairro')
+    .isString()
+    .notEmpty()
+    .withMessage('O bairro é obrigatório.'),
+  body('cidade')
+    .isString()
+    .notEmpty()
+    .withMessage('A cidade é obrigatória.'),
+  body('estado')
+    .isString()
+    .notEmpty()
+    .withMessage('O estado é obrigatório.'),
+  body('cep')
+    .isString()
+    .notEmpty()
+    .withMessage('O CEP é obrigatório.'),
 ];
 
 module.exports = {

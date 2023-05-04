@@ -140,34 +140,17 @@ const atualizacao = async (req, res) => {
 
   const reqUsuario = req.usuario;
 
-  if (tipo === 'cpf') {
-    const update = {
-      $unset:
-      {
-        segmento: 1,
-        razaoSocial: 1,
-        cnpj: 1,
-        inscricaoEstadual: 1,
-        isento: 1,
-        incricaoMunicipal: 1,
-        cnae: 1,
-        atividadePrincipal: 1,
-        regimeTributario: 1,
-        tamanhoEmpresa: 1,
-        faturamentoAnual: 1,
-        quantidadeFuncionario: 1,
-      },
-    };
-    await Usuario.updateOne({ _id: reqUsuario._id }, update);
-  } else if (tipo === 'cnpj') {
-    const update = {
-      $unset:
-      {
-        nome: 1,
-        cpf: 1,
-      },
-    };
-    await Usuario.updateOne({ _id: reqUsuario._id }, update);
+  const unsetFields = {};
+
+  Object.keys(req.body).forEach((key) => {
+    const value = req.body[key];
+    if (!value) {
+      unsetFields[key] = 1;
+    }
+  });
+
+  if (Object.keys(unsetFields).length > 0) {
+    await Usuario.updateOne({ _id: reqUsuario._id }, { $unset: unsetFields });
   }
 
   const usuario = await Usuario.findById(reqUsuario._id).select('-senha');
@@ -175,11 +158,6 @@ const atualizacao = async (req, res) => {
   if (usuario !== null) {
     usuario.nome = nome || usuario.nome;
     usuario.razaoSocial = razaoSocial || usuario.razaoSocial;
-    if (senha && senha !== null) {
-      const salt = await bcrypt.genSalt();
-      const senhaHash = await bcrypt.hash(senha, salt);
-      usuario.senha = senhaHash;
-    }
     usuario.cnpj = cnpj || usuario.cnpj;
     usuario.cpf = cpf || usuario.cpf;
     usuario.tipo = tipo || usuario.tipo;
@@ -202,7 +180,12 @@ const atualizacao = async (req, res) => {
     usuario.estado = estado || usuario.estado;
     usuario.cep = cep || usuario.cep;
 
-    console.log(usuario);
+    if (senha && senha !== null) {
+      const salt = await bcrypt.genSalt();
+      const senhaHash = await bcrypt.hash(senha, salt);
+      usuario.senha = senhaHash;
+    }
+
     await usuario.save();
 
     res.status(200).json(usuario);

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const usuarioSchema = new mongoose.Schema({
-
   email: {
     type: String,
     required: true,
@@ -22,7 +21,6 @@ const usuarioSchema = new mongoose.Schema({
       return this.tipo === 'cpf';
     },
   },
-  nomeFantasia: String,
   cpf: {
     type: String,
     required() {
@@ -41,6 +39,7 @@ const usuarioSchema = new mongoose.Schema({
       return this.tipo === 'cnpj';
     },
   },
+  nomeFantasia: String,
   inscricaoEstadual: String,
   isento: Boolean,
   inscricaoMunicipal: String,
@@ -51,7 +50,6 @@ const usuarioSchema = new mongoose.Schema({
   segmento: Array,
   faturamentoAnual: String,
   quantidadeFuncionario: String,
-
   logradouro: {
     type: String,
     required: true,
@@ -61,7 +59,6 @@ const usuarioSchema = new mongoose.Schema({
     required: true,
   },
   complemento: String,
-
   bairro: {
     type: String,
     required: true,

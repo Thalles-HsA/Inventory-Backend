@@ -1,6 +1,6 @@
 {
   "name": "backend-inventory",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Backend do Projeto Inventory",
   "main": "app.js",
   "scripts": {

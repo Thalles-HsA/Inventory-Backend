@@ -69,7 +69,7 @@ const removeDadosNaoUtilizadoNoBD = async (dados, reqUsuario) => {
 
 const atualizaUsuario = async (dados, reqUsuario) => {
   const {
-    nome, razaoSocial, cpf, cnpj, tipo, logradouro,
+    nome, senha, razaoSocial, cpf, cnpj, tipo, logradouro,
     numero, bairro, cidade, estado, cep, complemento,
     nomeFantasia, inscricaoEstadual, isento, inscricaoMunicipal,
     cnae, atividadePrincipal, regimeTributario, tamanhoEmpresa,
@@ -102,6 +102,11 @@ const atualizaUsuario = async (dados, reqUsuario) => {
     usuario.cidade = cidade || usuario.cidade;
     usuario.estado = estado || usuario.estado;
     usuario.cep = cep || usuario.cep;
+    if (senha && senha !== null) {
+      const salt = await bcrypt.genSalt();
+      const senhaHash = await bcrypt.hash(senha, salt);
+      usuario.senha = senhaHash;
+    }
   }
 
   return usuario;

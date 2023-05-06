@@ -1,10 +1,17 @@
 const { body } = require('express-validator');
 const cpfCnpjValidator = require('cpf-cnpj-validator');
+const Usuario = require('../models/Usuario');
 
 const validacaoDeUsuario = () => [
   body('email')
     .isEmail()
-    .withMessage('E-mail inválido.'),
+    .withMessage('E-mail inválido.')
+    .custom(async (email) => {
+      const usuario = await Usuario.findOne({ email });
+      if (usuario) {
+        throw new Error('E-mail já cadastrado em nossa base de dados, recupere sua senha ou utilize outro e-mail.');
+      }
+    }),
   body('senha')
     .isString()
     .withMessage('A senha é obrigatória.')
@@ -68,13 +75,19 @@ const validacaoDeLogin = () => [
     .isString()
     .withMessage('O e-mail é obrigatório.')
     .isEmail()
-    .withMessage('Insira um e-mail válido'),
+    .withMessage('Insira um e-mail válido')
+    .custom(async (email) => {
+      const usuario = await Usuario.findOne({ email });
+      if (!usuario) {
+        throw new Error('Usuário não cadastrado. Confira seu email ou realize seu cadastro');
+      }
+    }),
   body('senha')
     .isString()
     .withMessage('A senha é obrigatória.'),
 ];
 
-const atualizacaoDeUsuario = () => [
+const validacaoDeAtualizacaoDeUsuario = () => [
   body('tipo')
     .isString()
     .withMessage('O tipo é obrigatório.'),
@@ -128,7 +141,7 @@ const atualizacaoDeUsuario = () => [
     .withMessage('O CEP é obrigatório.'),
 ];
 
-const atualizacaodeSenha = () => [
+const validacaoDeAtualizacaodeSenha = () => [
   body('senha')
     .isString()
     .withMessage('A senha é obrigatória.'),
@@ -139,10 +152,16 @@ const atualizacaodeSenha = () => [
     .withMessage('A senha deve ter pelo menos 6 caracteres.'),
   body('confirmarSenha')
     .isString()
-    .withMessage('A confirmação de senha é obrigatória.'),
+    .withMessage('A confirmação de senha é obrigatória.')
+    .custom((value, { req }) => {
+      if (value !== req.body.novaSenha) {
+        throw new Error('As senhas não coincidem.');
+      }
+      return true;
+    }),
 ];
 
-const solicitaRecuperacaoSenha = () => [
+const validacaoDeSolicitaRecuperacaoSenha = () => [
   body('email')
     .isString()
     .withMessage('O e-mail é obrigatório.')
@@ -150,7 +169,7 @@ const solicitaRecuperacaoSenha = () => [
     .withMessage('Insira um e-mail válido'),
 ];
 
-const recuperacaoSenha = () => [
+const validacaoDeRecuperacaoSenha = () => [
   body('novaSenha')
     .isString()
     .withMessage('A senha é obrigatória.')
@@ -158,14 +177,20 @@ const recuperacaoSenha = () => [
     .withMessage('A senha deve ter pelo menos 6 caracteres.'),
   body('confirmarSenha')
     .isString()
-    .withMessage('A confirmação de senha é obrigatória.'),
+    .withMessage('A confirmação de senha é obrigatória.')
+    .custom((value, { req }) => {
+      if (value !== req.body.novaSenha) {
+        throw new Error('As senhas não coincidem.');
+      }
+      return true;
+    }),
 ];
 
 module.exports = {
-  validacaoDeLogin,
-  atualizacaoDeUsuario,
   validacaoDeUsuario,
-  atualizacaodeSenha,
-  solicitaRecuperacaoSenha,
-  recuperacaoSenha,
+  validacaoDeLogin,
+  validacaoDeAtualizacaoDeUsuario,
+  validacaoDeAtualizacaodeSenha,
+  validacaoDeSolicitaRecuperacaoSenha,
+  validacaoDeRecuperacaoSenha,
 };

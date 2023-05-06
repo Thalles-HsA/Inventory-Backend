@@ -4,50 +4,20 @@ const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
 
 const jwtSecret = process.env.JWT_SECRET;
-
 if (!jwtSecret) {
   throw new Error('JWT_SECRET não está definido');
 }
-
-// Gerando o token de usuário
 const gerarToken = (id) => jwt.sign({ id }, jwtSecret, {
   expiresIn: '7d',
 });
 
-// Registrando e Logando o Usuário
-
-const registrar = async (req, res) => {
+const criaNovoUsuario = async (dados) => {
   const {
-    tipo,
-    email,
-    senha,
-    nome,
-    cpf,
-    razaoSocial,
-    cnpj,
-    logradouro,
-    complemento,
-    numero,
-    bairro,
-    cidade,
-    estado,
-    cep,
-  } = req.body;
-
-  // check if usuario exists
-  const usuario = await Usuario.findOne({ email });
-
-  if (usuario) {
-    res.status(422).json({ errors: ['E-mail já cadastrado em nossa base de dados, recupere sua senha ou utilize outro e-mail.'] });
-    return;
-  }
-
-  // Generate senha has
+    tipo, email, senha, nome, cpf, razaoSocial, cnpj,
+    logradouro, complemento, numero, bairro, cidade, estado, cep,
+  } = dados;
   const salt = await bcrypt.genSalt();
   const senhaHash = await bcrypt.hash(senha, salt);
-
-  // Criando usuario com codições
-
   const novoUsuario = await Usuario.create({
     email,
     senha: senhaHash,
@@ -68,82 +38,25 @@ const registrar = async (req, res) => {
     throw new Error('Houve um erro ao criar o usuário');
   }
 
-  res.status(201).json({
-    // eslint-disable-next-line no-underscore-dangle
-    _id: novoUsuario._id,
-    // eslint-disable-next-line no-underscore-dangle
-    token: gerarToken(novoUsuario._id.toString()),
-  });
+  return novoUsuario;
 };
 
-const usuarioAtivo = async (req, res) => {
-  const { usuario } = req;
-
-  res.status(200).json(usuario);
-};
-
-// Logando usuário
-const login = async (req, res) => {
-  const { email, senha } = req.body;
+const buscaUsuarioParaLogin = async (dados) => {
+  const { email, senha } = dados;
 
   const usuario = await Usuario.findOne({ email });
-
-  // Checando se o usuário existe
-  if (!usuario) {
-    res.status(404).json({ errors: ['Usuário não cadastrado. Confira seu email ou realize seu cadastro'] });
-    return;
-  }
-
-  // checando se as senhas são iguais
   if (!(await bcrypt.compare(senha, usuario.senha))) {
-    res.status(422).json({ errors: ['Senha inválida!'] });
-    return;
+    throw new Error('Senha inválida!');
   }
 
-  // Retornando o usuário com o token
-  res.status(200).json({
-    // eslint-disable-next-line no-underscore-dangle
-    _id: usuario._id,
-    // eslint-disable-next-line no-underscore-dangle
-    token: gerarToken(usuario._id.toString()),
-  });
+  return usuario;
 };
 
-// Atualizando o usuario
-const atualizacao = async (req, res) => {
-  const {
-    nome,
-    razaoSocial,
-    cpf,
-    cnpj,
-    tipo,
-    senha,
-    logradouro,
-    numero,
-    bairro,
-    cidade,
-    estado,
-    cep,
-    complemento,
-    nomeFantasia,
-    inscricaoEstadual,
-    isento,
-    inscricaoMunicipal,
-    cnae,
-    atividadePrincipal,
-    regimeTributario,
-    tamanhoEmpresa,
-    segmento,
-    faturamentoAnual,
-    quantidadeFuncionario,
-  } = req.body;
-
-  const reqUsuario = req.usuario;
-
+const removeDadosNaoUtilizadoNoBD = async (dados, reqUsuario) => {
   const unsetFields = {};
 
-  Object.keys(req.body).forEach((key) => {
-    const value = req.body[key];
+  Object.keys(dados).forEach((key) => {
+    const value = dados[key];
     if (!value) {
       unsetFields[key] = 1;
     }
@@ -152,6 +65,16 @@ const atualizacao = async (req, res) => {
   if (Object.keys(unsetFields).length > 0) {
     await Usuario.updateOne({ _id: reqUsuario._id }, { $unset: unsetFields });
   }
+};
+
+const atualizaUsuario = async (dados, reqUsuario) => {
+  const {
+    nome, razaoSocial, cpf, cnpj, tipo, logradouro,
+    numero, bairro, cidade, estado, cep, complemento,
+    nomeFantasia, inscricaoEstadual, isento, inscricaoMunicipal,
+    cnae, atividadePrincipal, regimeTributario, tamanhoEmpresa,
+    segmento, faturamentoAnual, quantidadeFuncionario,
+  } = dados;
 
   const usuario = await Usuario.findById(reqUsuario._id).select('-senha');
 
@@ -179,38 +102,20 @@ const atualizacao = async (req, res) => {
     usuario.cidade = cidade || usuario.cidade;
     usuario.estado = estado || usuario.estado;
     usuario.cep = cep || usuario.cep;
-
-    if (senha && senha !== null) {
-      const salt = await bcrypt.genSalt();
-      const senhaHash = await bcrypt.hash(senha, salt);
-      usuario.senha = senhaHash;
-    }
-
-    await usuario.save();
-
-    res.status(200).json(usuario);
   }
+
+  return usuario;
 };
 
-const atualizacaoDeSenha = async (req, res) => {
+const atualizaSenha = async (dados, reqUsuario) => {
   const {
     senha,
     novaSenha,
-    confirmarSenha,
-  } = req.body;
-
-  const reqUsuario = req.usuario;
-
+  } = dados;
   const usuario = await Usuario.findById(reqUsuario._id);
 
   if (!(await bcrypt.compare(senha, usuario.senha))) {
-    res.status(422).json({ errors: ['Senha atual inválida!'] });
-    return;
-  }
-
-  if (novaSenha !== confirmarSenha) {
-    res.status(422).json({ errors: ['A confirmação de senha não é igual à nova senha.'] });
-    return;
+    throw new Error('Senha atual inválida');
   }
 
   if (usuario !== null) {
@@ -219,15 +124,67 @@ const atualizacaoDeSenha = async (req, res) => {
       const senhaHash = await bcrypt.hash(novaSenha, salt);
       usuario.senha = senhaHash;
     }
-    await usuario.save();
-    res.status(200).json(usuario);
+  }
+
+  return usuario;
+};
+
+const registrarUsuario = async (req, res) => {
+  try {
+    const novoUsuario = await criaNovoUsuario(req.body);
+    res.status(201).json({
+      _id: novoUsuario._id,
+      token: gerarToken(novoUsuario._id.toString()),
+    });
+  } catch (error) {
+    res.status(422).json({ errors: [error.message] });
+  }
+};
+
+const realizarLogin = async (req, res) => {
+  try {
+    const usuario = await buscaUsuarioParaLogin(req.body);
+    res.status(200).json({
+      _id: usuario._id,
+      token: gerarToken(usuario._id.toString()),
+    });
+  } catch (error) {
+    res.status(422).json({ errors: [error.message] });
+  }
+};
+
+const pegarUsuarioAtivo = async (req, res) => {
+  const { usuario } = req;
+  res.status(200).json(usuario);
+};
+
+const atualizarDadosDoUsuario = async (req, res) => {
+  try {
+    const reqUsuario = req.usuario;
+    removeDadosNaoUtilizadoNoBD(req.body, reqUsuario);
+    const usuarioAtualizado = await atualizaUsuario(req.body, reqUsuario);
+    await usuarioAtualizado.save();
+    res.status(200).json(usuarioAtualizado);
+  } catch (error) {
+    res.status(422).json({ errors: [error.message] });
+  }
+};
+
+const atualizarSenhaDeUsuario = async (req, res) => {
+  try {
+    const reqUsuario = req.usuario;
+    const senhaAtualizada = await atualizaSenha(req.body, reqUsuario);
+    await senhaAtualizada.save();
+    res.status(200).json(senhaAtualizada);
+  } catch (error) {
+    res.status(422).json({ errors: [error.message] });
   }
 };
 
 module.exports = {
-  registrar,
-  usuarioAtivo,
-  login,
-  atualizacao,
-  atualizacaoDeSenha,
+  registrarUsuario,
+  realizarLogin,
+  pegarUsuarioAtivo,
+  atualizarDadosDoUsuario,
+  atualizarSenhaDeUsuario,
 };

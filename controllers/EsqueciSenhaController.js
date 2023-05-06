@@ -5,8 +5,6 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Usuario = require('../models/Usuario');
 
-require('dotenv').config();
-
 const jwtSecret = process.env.JWT_SECRET;
 const sendinblueSMTPHost = process.env.SENDINBLUE_SMTP_HOST;
 const sendinblueSMTPPort = process.env.SENDINBLUE_SMTP_PORT;
@@ -14,16 +12,15 @@ const sendinblueSMTPUser = process.env.SENDINBLUE_SMTP_USER;
 const sendinblueSMTPPassword = process.env.SENDINBLUE_SMTP_PASSWORD;
 const resetUrl = process.env.URL_RESET_SUA_SENHA;
 
+require('dotenv').config();
+
 if (!jwtSecret) {
   throw new Error('JWT_SECRET não está definido');
 }
-
-// Gerando o token de usuário
 const gerarToken = (email) => jwt.sign({ email }, jwtSecret, {
   expiresIn: '1h',
 });
 
-// configuração do transportador de e-mail
 const transporter = nodemailer.createTransport({
   host: sendinblueSMTPHost,
   port: sendinblueSMTPPort,
@@ -33,8 +30,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// função para enviar e-mail
-const enviarEmailRecuperacaoSenha = (destinatario, token, res) => {
+const configuraEmailDeRecuperacaoSenha = (destinatario, token, res) => {
   const mailOptions = {
     from: `Projeto Inventory ${sendinblueSMTPUser}`,
     to: destinatario,
@@ -50,14 +46,13 @@ const enviarEmailRecuperacaoSenha = (destinatario, token, res) => {
   });
 };
 
-const enviaEmailRecuperacaoSenha = async (req, res) => {
+const enviarEmailDeRecuperacaoDeSenha = async (req, res) => {
   const {
     email,
   } = req.body;
 
   const usuario = await Usuario.findOne({ email });
 
-  // Checando se o usuário existe
   if (!usuario) {
     res.status(404).json({ errors: ['Usuário não cadastrado. Confira seu email ou realize seu cadastro'] });
     return;
@@ -65,22 +60,15 @@ const enviaEmailRecuperacaoSenha = async (req, res) => {
 
   const token = gerarToken(email.toString());
 
-  enviarEmailRecuperacaoSenha(email, token, res);
+  configuraEmailDeRecuperacaoSenha(email, token, res);
 };
 
-const recuperaSenha = async (req, res) => {
+const atualizaSenha = async (dados) => {
   const {
     email,
     novaSenha,
-    confirmarSenha,
-  } = req.body;
-
+  } = dados;
   const usuario = await Usuario.findOne({ email });
-
-  if (novaSenha !== confirmarSenha) {
-    res.status(422).json({ errors: ['A confirmação de senha não é igual à nova senha.'] });
-    return;
-  }
 
   if (usuario !== null) {
     if (novaSenha && novaSenha !== null) {
@@ -88,14 +76,22 @@ const recuperaSenha = async (req, res) => {
       const senhaHash = await bcrypt.hash(novaSenha, salt);
       usuario.senha = senhaHash;
     }
+  }
 
-    console.log(usuario);
-    await usuario.save();
-    res.status(200).json(usuario);
+  return usuario;
+};
+
+const recuperarSenhadeUsuario = async (req, res) => {
+  try {
+    const senhaAtualizada = await atualizaSenha(req.body);
+    await senhaAtualizada.save();
+    res.status(200).json(senhaAtualizada);
+  } catch (error) {
+    res.status(422).json({ errors: [error.message] });
   }
 };
 
 module.exports = {
-  enviaEmailRecuperacaoSenha,
-  recuperaSenha,
+  enviarEmailDeRecuperacaoDeSenha,
+  recuperarSenhadeUsuario,
 };

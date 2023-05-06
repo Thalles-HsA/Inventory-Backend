@@ -22,7 +22,9 @@ app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 require('./config/db');
 
 // routes
-app.use('/api/usuarios', require('./routes/UsuariosRotas'));
+const router = require('./routes/Router');
+
+app.use(router);
 
 app.listen(port, () => {
   // eslint-disable-next-line no-console

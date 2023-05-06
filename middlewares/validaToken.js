@@ -6,7 +6,7 @@ if (!jwtSecret) {
   throw new Error('JWT_SECRET não está definido');
 }
 
-const validateToken = async (req, res) => {
+const validarToken = async (req, res) => {
   const { token } = req.body;
   // Verificar se o cabeçalho (header) contém um token
   if (!token) {
@@ -18,11 +18,10 @@ const validateToken = async (req, res) => {
     jwt.verify(token, jwtSecret);
     return res.status(200).json({ isValid: true });
   } catch (err) {
-    console.log(err);
     return res.status(400).json({ errors: ['O Token é inválido!'] });
   }
 };
 
 module.exports = {
-  validateToken,
+  validarToken,
 };

@@ -4,40 +4,38 @@ const router = expressRoute.Router();
 
 // Controller
 const {
-  registrar,
-  usuarioAtivo,
-  login,
-  atualizacao,
-  atualizacaoDeSenha,
+  registrarUsuario,
+  pegarUsuarioAtivo,
+  realizarLogin,
+  atualizarDadosDoUsuario,
+  atualizarSenhaDeUsuario,
 } = require('../controllers/UsuarioController');
-
 const {
-  enviaEmailRecuperacaoSenha,
-  recuperaSenha,
-} = require('../controllers/EsqueciMinhaSenhaController');
+  enviarEmailDeRecuperacaoDeSenha,
+  recuperarSenhadeUsuario,
+} = require('../controllers/EsqueciSenhaController');
 
 // Middlewares
 const { validate } = require('../middlewares/handleValidations');
 const {
   validacaoDeUsuario,
   validacaoDeLogin,
-  atualizacaoDeUsuario,
-  atualizacaodeSenha,
-  solicitaRecuperacaoSenha,
-  recuperacaoSenha,
+  validacaoDeAtualizacaoDeUsuario,
+  validacaoDeAtualizacaodeSenha,
+  validacaoDeSolicitaRecuperacaoSenha,
+  validacaoDeRecuperacaoSenha,
 } = require('../middlewares/validacaoDeUsuario');
 const { authGuard } = require('../middlewares/authGuard');
-const { validateToken } = require('../middlewares/validateToken');
+const { validarToken } = require('../middlewares/validaToken');
 
 // Routes
-
-router.post('/cadastro', validacaoDeUsuario(), validate, registrar);
-router.post('/login', validacaoDeLogin(), validate, login);
-router.get('/perfil', authGuard, usuarioAtivo);
-router.put('/', authGuard, atualizacaoDeUsuario(), validate, atualizacao);
-router.put('/atualizaSenha', authGuard, atualizacaodeSenha(), validate, atualizacaoDeSenha);
-router.post('/solicitaRecuperacaoSenha', solicitaRecuperacaoSenha(), validate, enviaEmailRecuperacaoSenha);
-router.post('/validacaoToken', validateToken);
-router.put('/recuperaSenha', recuperacaoSenha(), validate, recuperaSenha);
+router.post('/cadastro', validacaoDeUsuario(), validate, registrarUsuario);
+router.post('/solicitaRecuperacaoSenha', validacaoDeSolicitaRecuperacaoSenha(), validate, enviarEmailDeRecuperacaoDeSenha);
+router.post('/validacaoToken', validarToken);
+router.post('/login', validacaoDeLogin(), validate, realizarLogin);
+router.get('/perfil', authGuard, pegarUsuarioAtivo);
+router.put('/', authGuard, validacaoDeAtualizacaoDeUsuario(), validate, atualizarDadosDoUsuario);
+router.put('/atualizaSenha', authGuard, validacaoDeAtualizacaodeSenha(), validate, atualizarSenhaDeUsuario);
+router.put('/recuperaSenha', validacaoDeRecuperacaoSenha(), validate, recuperarSenhadeUsuario);
 
 module.exports = router;

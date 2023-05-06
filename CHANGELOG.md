@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/Thalles-HsA/Inventory-Backend/compare/v1.1.1...v1.1.2) (2023-05-06)
+
+
+### Bug Fixes
+
+* :bug: Resolve erro com remoção do campo senha da base de dados ([c7d8db6](https://github.com/Thalles-HsA/Inventory-Backend/commit/c7d8db67764a0651af26763ea153bb733129ec6c))
+
 ## [1.1.1](https://github.com/Thalles-HsA/Inventory-Backend/compare/v1.1.0...v1.1.1) (2023-05-06)
 
 # [1.1.0](https://github.com/Thalles-HsA/Inventory-Backend/compare/v1.0.3...v1.1.0) (2023-05-06)

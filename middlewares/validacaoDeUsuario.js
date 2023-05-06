@@ -128,8 +128,44 @@ const atualizacaoDeUsuario = () => [
     .withMessage('O CEP é obrigatório.'),
 ];
 
+const atualizacaodeSenha = () => [
+  body('senha')
+    .isString()
+    .withMessage('A senha é obrigatória.'),
+  body('novaSenha')
+    .isString()
+    .withMessage('A senha é obrigatória.')
+    .isLength({ min: 6 })
+    .withMessage('A senha deve ter pelo menos 6 caracteres.'),
+  body('confirmarSenha')
+    .isString()
+    .withMessage('A confirmação de senha é obrigatória.'),
+];
+
+const solicitaRecuperacaoSenha = () => [
+  body('email')
+    .isString()
+    .withMessage('O e-mail é obrigatório.')
+    .isEmail()
+    .withMessage('Insira um e-mail válido'),
+];
+
+const recuperacaoSenha = () => [
+  body('novaSenha')
+    .isString()
+    .withMessage('A senha é obrigatória.')
+    .isLength({ min: 6 })
+    .withMessage('A senha deve ter pelo menos 6 caracteres.'),
+  body('confirmarSenha')
+    .isString()
+    .withMessage('A confirmação de senha é obrigatória.'),
+];
+
 module.exports = {
   validacaoDeLogin,
   atualizacaoDeUsuario,
   validacaoDeUsuario,
+  atualizacaodeSenha,
+  solicitaRecuperacaoSenha,
+  recuperacaoSenha,
 };

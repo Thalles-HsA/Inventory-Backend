@@ -192,9 +192,42 @@ const atualizacao = async (req, res) => {
   }
 };
 
+const atualizacaoDeSenha = async (req, res) => {
+  const {
+    senha,
+    novaSenha,
+    confirmarSenha,
+  } = req.body;
+
+  const reqUsuario = req.usuario;
+
+  const usuario = await Usuario.findById(reqUsuario._id);
+
+  if (!(await bcrypt.compare(senha, usuario.senha))) {
+    res.status(422).json({ errors: ['Senha atual inválida!'] });
+    return;
+  }
+
+  if (novaSenha !== confirmarSenha) {
+    res.status(422).json({ errors: ['A confirmação de senha não é igual à nova senha.'] });
+    return;
+  }
+
+  if (usuario !== null) {
+    if (senha && senha !== null) {
+      const salt = await bcrypt.genSalt();
+      const senhaHash = await bcrypt.hash(novaSenha, salt);
+      usuario.senha = senhaHash;
+    }
+    await usuario.save();
+    res.status(200).json(usuario);
+  }
+};
+
 module.exports = {
   registrar,
   usuarioAtivo,
   login,
   atualizacao,
+  atualizacaoDeSenha,
 };

@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Solve CORS
-app.use(cors({ credentials: true, origin: ['http://localhost:3000', 'http://localhost:3001', 'https://projeto-inventory.vercel.app'] }));
+app.use(cors({ credentials: true, origin: ['http://localhost:3000', 'https://projeto-inventory.vercel.app'] }));
 
 // Upload directory
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));

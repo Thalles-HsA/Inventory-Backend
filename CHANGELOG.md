@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Thalles-HsA/Inventory-Backend/compare/v1.0.3...v1.1.0) (2023-05-06)
+
+
+### Features
+
+* :sparkles: Introduz a funcionaildade de envio de email e recuperação de senha ([406400f](https://github.com/Thalles-HsA/Inventory-Backend/commit/406400fdb7e658dd1cdd1e46aed82bfc3c4597ff))
+
 ## [1.0.3](https://github.com/Thalles-HsA/Inventory-Backend/compare/v1.0.2...v1.0.3) (2023-05-04)
 
 ## [1.0.2](https://github.com/Thalles-HsA/Inventory-Backend/compare/v1.0.1...v1.0.2) (2023-05-04)
